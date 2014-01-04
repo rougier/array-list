@@ -25,7 +25,7 @@ They can also be appended/inserted by groups if group size(s) is specified::
     [ [0 1] [2 3] [4 5] [6 7] [8 9] ]
     >>> L = TypedList(np.arange(10), [2,3,5])
     >>> print L
-    [ [0 1] [2 3 4 [5 6 7 8 9] ]
+    [ [0 1] [2 3 4] [5 6 7 8 9] ]
 
 Each item can be easily accessed using sliced notation::
 
@@ -41,19 +41,3 @@ The underlying array can be accessed using the `data` property::
     >>> L = TypedList(np.arange(10), 1+np.arange(4))
     >>> print L.data
     [ 0 1 2 3 4 5 6 7 8 9 ]
-
-
-TypedTuple
-----------
-
-A TypeTuple is a fixed size TypedList whose size is determined at creation::
-
-    >>> Z = np.arange(10)
-    >>> T = TypedTuple(Z, 1+np.arange(4))
-    >>> T[3] += 1
-    >>> print Z
-    [ 0 1 2 3 4 5 7 8 9 10 ]
-
-It can be made immutable by specifying so at creation time::
-
-    >>> T = TypedTuple(np.arange(10), 1+np.arange(4), immutable=True)

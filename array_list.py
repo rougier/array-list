@@ -4,13 +4,13 @@
 # Distributed under the terms of the new BSD License.
 # -----------------------------------------------------------------------------
 """
-A List is a strongly typed list whose type can be anything that can be
+An ArrayList is a strongly typed list whose type can be anything that can be
 interpreted as a numpy data type. 
 
 Example
 -------
 
->>> L = TypedList( [[0], [1,2], [3,4,5], [6,7,8,9]] )
+>>> L = ArrayList( [[0], [1,2], [3,4,5], [6,7,8,9]] )
 >>> print L
 [ [0] [1 2] [3 4 5] [6 7 8 9] ]
 >>> print L.data
@@ -23,7 +23,7 @@ specify individual item sizes.
 Example
 -------
 
->>> L = TypedList( np.arange(10), [3,3,4])
+>>> L = ArrayList( np.arange(10), [3,3,4])
 >>> print L
 [ [0 1 2] [3 4 5] [6 7 8 9] ]
 >>> print L.data
@@ -33,13 +33,13 @@ Example
 import numpy as np
 
 
-class TypedList(object):
+class ArrayList(object):
     """
-    A TypedList is a strongly typed list whose type can be anything that can be
+    An ArrayList is a strongly typed list whose type can be anything that can be
     interpreted as a numpy data type.
     """
 
-    def __init__(self, data=None, sizes=None, dtype=float):
+    def __init__(self, data=None, sizes=None, dtype=float, sizeable=True, writeable=True):
         """ Create a new buffer using given data and sizes or dtype
 
         Parameters
@@ -61,31 +61,54 @@ class TypedList(object):
 
         dtype: np.dtype
             Any object that can be interpreted as a numpy data type.
+
+        sizeable : boolean
+            Indicate whether item can be appended/inserted/deleted
+
+        writeable : boolean
+            Indicate whether content can be changed
         """
 
+        self._sizeable = sizeable
+        self._writeable = writeable
+
         if data is not None:
-            if type(data) is np.ndarray:
-                dtype = data.dtype
-            elif type(data) in [list,tuple]:
+            if type(data) in [list,tuple]:
                 if type(data[0]) in [list,tuple]:
                     sizes = [len(l) for l in data]
                     data = [item for sublist in data for item in sublist]
-                    data = np.array(data,copy=False)
-                    dtype = data.dtype
+            self._data = np.array(data, copy=False)
+            self._size = self._data.size
+
+            # Default is one group with all data inside
+            _sizes = np.ones(1)*self._data.size
+
+            # Check item sizes and get items count
+            if sizes is not None:
+                if type(sizes) is int:
+                    if (self._size % sizes) != 0:
+                        raise ValueError("Cannot partition data as requested")
+                    self._count = self._size//sizes
+                    _sizes = np.ones(self._count,dtype=int)*(self._size//self._count)
                 else:
-                    data = np.array(data,copy=False)
-                    dtype = data.dtype
+                    _sizes = np.array(sizes, copy=False)
+                    self._count = len(sizes)
+                    if _sizes.sum() != self._size:
+                        raise ValueError("Cannot partition data as requested")
             else:
-                raise ValueError("Data type not understood")
+                self._count = 1
 
-        self._data = np.zeros(512, dtype=dtype)
-        self._items = np.zeros((64,2), dtype=int)
-        self._size = 0
-        self._count = 0
-        
-        if data is not None:
-            self.append(data,sizes)
+            # Store items
+            self._items = np.zeros((self._count,2),int)
+            C = _sizes.cumsum()
+            self._items[1:,0] += C[:-1]
+            self._items[0:,1] += C
 
+        else:
+            self._data = np.zeros(512, dtype=dtype)
+            self._items = np.zeros((64,2), dtype=int)
+            self._size = 0
+            self._count = 0
 
 
     @property
@@ -160,6 +183,9 @@ class TypedList(object):
     def __setitem__(self, key, data):
         """ x.__setitem__(i, y) <==> x[i]=y """
 
+        if not self._writeable:
+            raise AttributeError("List is not sizeable")
+
         # Setting a specific dtype field for all items
         if type(key) is str:
             self._data[key][:self._size] = data
@@ -200,6 +226,9 @@ class TypedList(object):
 
     def __delitem__(self, key):
         """ x.__delitem__(y) <==> del x[y] """
+
+        if not self._sizeable:
+            raise AttributeError("List is not sizeable")
 
         # Deleting a single item
         if type(key) is int:
@@ -263,15 +292,15 @@ class TypedList(object):
             an error is raised.
         """
 
+        if not self._sizeable:
+            raise RuntimeError("List is not sizeable")
+
         if type(data) in [list,tuple] and type(data[0]) in [list,tuple]:
             sizes = [len(l) for l in data]
             data = [item for sublist in data for item in sublist]
 
         data = np.array(data,copy=False).ravel()
         size = data.size
-
-        # Default is one group with all data inside
-        _sizes = np.ones(1)*data.size
 
         # Check item size and get item number
         if sizes is not None:

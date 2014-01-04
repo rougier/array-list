@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 import time
 import numpy as np
-from typed_list import TypedList
+from array_list import ArrayList
 
 
 n = 100000
@@ -16,24 +16,31 @@ for i in xrange(n):
     l.append(i)
 t0 = time.clock() -t 
 
-a = TypedList(dtype=int)
+L = np.ones(0)
+t = time.clock()
+for i in xrange(n):
+    L = np.append(L,i)
+t1 = time.clock() -t 
+
+a = ArrayList(dtype=int)
 t = time.clock()
 for i in xrange(n):
     a.append(i)
-t1 = time.clock() -t 
+t2 = time.clock() -t 
 
-a = TypedList(dtype=int)
+a = ArrayList(dtype=int)
 t = time.clock()
 for i in xrange(n/1000):
     a.append(i+np.arange(1000),1)
-t2 = time.clock() -t 
-
-a = TypedList(dtype=int)
-t = time.clock()
-a.append(i+np.arange(n),1)
 t3 = time.clock() -t 
 
-print "list:                %.3fs" % (t0)
-print "List (batch=1):      %.3fs" % (t1)
-print "List (batch=1000):   %.3fs" % (t2)
-print "List (batch=100000): %.3fs" % (t3)
+a = ArrayList(dtype=int)
+t = time.clock()
+a.append(i+np.arange(n),1)
+t4 = time.clock() -t 
+
+print "python list:              %.3fs" % (t0)
+print "numpy array:              %.3fs" % (t1)
+print "ArrayList (batch=1):      %.3fs" % (t2)
+print "ArrayList (batch=1000):   %.3fs" % (t3)
+print "ArrayList (batch=100000): %.3fs" % (t4)
