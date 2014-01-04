@@ -1,13 +1,7 @@
-Numpy objects
-=============
-
-This is a small collection of objects based on numpy array.
-
-
-TypedList
+ArrayList
 ---------
 
-A TypedList is a strongly typed list whose underlying structure is a contiguous
+An ArrayList is a strongly typed list whose underlying structure is a contiguous
 numpy array. An element of the list is a sequence of elementary dtyped values.
 Element can be appended/inserted individually::
 
