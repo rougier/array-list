@@ -149,12 +149,7 @@ class ArrayList(object):
     def __getitem__(self, key):
         """ x.__getitem__(y) <==> x[y] """
 
-        # Getting a specific dtype field for all items
-        if isinstance(key,str):
-            return self._data[key][:self._size]
-
-        # Getting data for a single item
-        elif type(key) is int:
+        if type(key) is int:
             if key < 0:
                 key += len(self)
             if key < 0 or key >= len(self):
@@ -163,7 +158,6 @@ class ArrayList(object):
             dstop  = self._items[key][1]
             return self._data[dstart:dstop]
 
-        # Getting data for several items at once
         elif type(key) is slice:
             istart, istop, step = key.indices(len(self))
             if istart > istop:
@@ -175,7 +169,12 @@ class ArrayList(object):
                 dstop  = self._items[istop-1][1]
             return self._data[dstart:dstop]
 
-        # Error
+        elif isinstance(key,str):
+            return self._data[key][:self._size]
+
+        elif key is Ellipsis:
+            return self.data
+
         else:
             raise TypeError("List indices must be integers")
 
@@ -186,12 +185,7 @@ class ArrayList(object):
         if not self._writeable:
             raise AttributeError("List is not sizeable")
 
-        # Setting a specific dtype field for all items
-        if type(key) is str:
-            self._data[key][:self._size] = data
-
-        # Setting a single item
-        elif type(key) is int:
+        if type(key) is int:
             if key < 0:
                 key += len(self)
             if key < 0 or key > len(self):
@@ -200,7 +194,6 @@ class ArrayList(object):
             dstop  = self._items[key][1]
             self._data[dstart:dstop] = data
 
-        # Setting several items at once
         elif type(key) is slice:
             istart, istop, step = key.indices(len(self))
             if istart > istop:
@@ -218,7 +211,13 @@ class ArrayList(object):
                 else:
                     dstop  = self._items[istop-1][1]
                 self._data[dstart:dstop] = data
-        # Error
+
+        elif key is Ellipsis:
+            self.data[...] = data
+
+        elif type(key) is str:
+            self._data[key][:self._size] = data
+
         else:
             raise TypeError("List assignment indices must be integers")
 

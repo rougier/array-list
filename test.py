@@ -87,6 +87,15 @@ class ArrayListDefault(unittest.TestCase):
         L[0] = 0
         assert L[0] == 0
 
+    def test_getitem_ellipsis(self):
+        L = ArrayList(np.arange(10),1)
+        assert np.allclose(L[...], np.arange(10))
+
+    def test_setitem_ellipsis(self):
+        L = ArrayList(np.arange(10),1)
+        L[...] = 0
+        assert np.allclose(L.data, np.zeros(10))
+
     def test_sizeable(self):
         L = ArrayList(sizeable=False)
         with self.assertRaises(AttributeError):
