@@ -119,6 +119,13 @@ class ArrayList(object):
 
 
     @property
+    def itemsize(self):
+        """ Individual item sizes """
+        return self._items[:self._count,1] - self._items[:self._count,0]
+
+
+
+    @property
     def size(self):
         """ Number of base elements, in memory. """
         return self._size
