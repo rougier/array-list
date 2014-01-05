@@ -254,6 +254,11 @@ class ArrayList(object):
                 return
             dstart = self._items[istart][0]
             dstop  = self._items[istop-1][1]
+
+        # Ellipsis
+        elif key is Ellipsis:
+            istart,istop = 0, len(self)
+            dstart, dstop = 0, self.size
         # Error
         else:
             raise TypeError("List deletion indices must be integers")
