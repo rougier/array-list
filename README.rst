@@ -17,7 +17,7 @@ They can also be appended/inserted by groups if group size(s) is specified::
     >>> L.append(np.arange(10), 2)
     >>> print L
     [ [0 1] [2 3] [4 5] [6 7] [8 9] ]
-    >>> L = TypedList(np.arange(10), [2,3,5])
+    >>> L = ArrayList(np.arange(10), [2,3,5])
     >>> print L
     [ [0 1] [2 3 4] [5 6 7 8 9] ]
 
